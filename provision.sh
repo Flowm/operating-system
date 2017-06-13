@@ -1,29 +1,37 @@
+#!/usr/bin/env bash
+set -ex
 
-#######################
-#
-# This is a provision script
-# it will be called once when the vagrant vm is first provisioned
-# If you have commands that you want to run always please have a
-# look at the bootstrap.sh script
-#
-# Contributor: Bernhard Blieninger
-######################
-sudo apt-get update -qq
-sudo apt-get upgrade -qq
-sudo apt-get install libncurses5-dev texinfo autogen autoconf2.64 g++ libexpat1-dev flex bison gperf cmake libxml2-dev libtool zlib1g-dev libglib2.0-dev make pkg-config gawk subversion expect git libxml2-utils syslinux xsltproc yasm iasl lynx unzip qemu alsa-base alsa-utils pulseaudio pulseaudio-utils ubuntu-desktop tftpd-hpa -qq
-cd /vagrant/
-sudo rm -rf genode/contrib/
-cd /vagrant/
-sudo git submodule init
-cd /vagrant/
-sudo git submodule update
-cd /vagrant/
-sudo tar xPfj genode/genode-toolchain-15.05-x86_64.tar.bz2
-cd /vagrant/
-sudo wget https://nextcloud.os.in.tum.de/s/KVfFOeRXVszFROl/download --no-check-certificate -O libports.tar.bz2
-sudo tar xvjC genode/ -f libports.tar.bz2
-cd /vagrant/
-sudo make vagrant
-cd /vagrant/
-sudo chown -R ubuntu /build
-sudo echo ubuntu:vagrant | /usr/sbin/chpasswd
+# Config
+INSTALLBASE=/var/tmp/modelcar
+INSTALLDIR=$INSTALLBASE/operating-system
+mkdir -p $INSTALLDIR
+
+# Poor man's vagrant detection
+if [ "$USER" = "ubuntu" ] || [ "$USER" = "vagrant" ]; then
+	VAGRANT=true
+fi
+
+if [ ${VAGRANT:-} ]; then
+	# Install initial packages
+	export DEBIAN_FRONTEND=noninteractive
+	sudo apt-get update
+	sudo apt-get upgrade
+	sudo apt-get install -y libncurses5-dev texinfo autogen autoconf2.64 g++ libexpat1-dev flex bison gperf cmake libxml2-dev libtool zlib1g-dev libglib2.0-dev make pkg-config gawk subversion expect git libxml2-utils syslinux xsltproc yasm iasl lynx unzip qemu alsa-base alsa-utils pulseaudio pulseaudio-utils ubuntu-desktop tftpd-hpa
+fi
+
+
+cd $INSTALLBASE
+git clone https://github.com/argos-research/operating-system.git
+#rm -rf $INSTALLDIR/genode/contrib/
+
+cd $INSTALLDIR
+
+git submodule init
+git submodule update
+
+tar xfj genode/genode-toolchain-15.05-x86_64.tar.bz2
+
+wget https://nextcloud.os.in.tum.de/s/KVfFOeRXVszFROl/download --no-check-certificate -O libports.tar.bz2
+tar xvjC genode/ -f libports.tar.bz2
+
+make
