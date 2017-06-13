@@ -36,6 +36,9 @@ toolchain:
 ports: foc libports dde_linux
 
 foc:
+	$(MAKE) -C genode/repos/base-foc prepare
+
+focnados:
 	$(MAKE) -C genode/repos/base-focnados prepare
 
 libports:
