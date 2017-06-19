@@ -1,17 +1,34 @@
 #!/usr/bin/env bash
-set -ex
+set -eu
 
-# Config
-INSTALLBASE=/var/tmp/modelcar
-INSTALLDIR=$INSTALLBASE/operating-system
-mkdir -p $INSTALLDIR
+usage() {
+	echo -e "Usage: $0 [-i]" 1>&2
+	echo -e "\t-i Install packages" 1>&2
+	exit 1
+}
+
+while getopts ":idh" opt; do
+	case $opt in
+		i)
+			INSTALL=true;
+			;;
+		v)
+			VERBOSE=true; set -x
+			;;
+		*)
+			usage
+			;;
+	esac
+done
+shift $(($OPTIND - 1))
 
 # Poor man's vagrant detection
 if [ "$USER" = "ubuntu" ] || [ "$USER" = "vagrant" ]; then
-	VAGRANT=true
+	# Install packages by default if running in vagrant
+	INSTALL=true
 fi
 
-if [ ${VAGRANT:-} ]; then
+if [ ${INSTALL:-} ]; then
 	# Install initial packages
 	export DEBIAN_FRONTEND=noninteractive
 	sudo apt-get update
@@ -19,12 +36,7 @@ if [ ${VAGRANT:-} ]; then
 	sudo apt-get install -y libncurses5-dev texinfo autogen autoconf2.64 g++ libexpat1-dev flex bison gperf cmake libxml2-dev libtool zlib1g-dev libglib2.0-dev make pkg-config gawk subversion expect git libxml2-utils syslinux xsltproc yasm iasl lynx unzip qemu alsa-base alsa-utils pulseaudio pulseaudio-utils ubuntu-desktop tftpd-hpa
 fi
 
-
-cd $INSTALLBASE
-git clone https://github.com/argos-research/operating-system.git
-#rm -rf $INSTALLDIR/genode/contrib/
-
-cd $INSTALLDIR
+#rm -rf genode/contrib/
 
 git submodule init
 git submodule update
