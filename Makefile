@@ -17,7 +17,7 @@ JENKINS_TOOLCHAIN_BUILD_DIR ?= $(JENKINS_BUILD_DIR)/toolchain-$(TOOLCHAIN_TARGET
 JENKINS_GENODE_BUILD_DIR    ?= $(JENKINS_BUILD_DIR)/genode-$(GENODE_TARGET)
 JENKINS_BUILD_CONF           = $(JENKINS_GENODE_BUILD_DIR)/etc/build.conf
 
-vagrant: ports build_dir
+vagrant: build_dir
 
 jenkins: foc jenkins_build_dir
 
@@ -33,7 +33,7 @@ toolchain:
 
 # ================================================================
 # Download Genode external sources. Only needs to be done once per system.
-ports: foc libports dde_linux
+ports: foc focnados libports dde_linux
 
 foc:
 	$(MAKE) -C genode/repos/base-foc prepare
